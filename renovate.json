@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^vars\\.yaml$"
+      ],
+      "matchStrings": [
+        "k0sVersion:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+\\+k0s\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "k0sproject/k0s", 
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^manifests/base/longhorn/kustomization\\.yaml$/"
+      ],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/longhorn/longhorn/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/deploy/longhorn\\.yaml"
+      ],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "longhorn/longhorn",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["github-releases"],
+      "extractVersionTemplate": "^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\+k0s\\.(?<build>\\d+)$"
+    }
+  ]
+}

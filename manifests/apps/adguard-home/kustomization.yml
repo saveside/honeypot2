@@ -1,0 +1,12 @@
+resources:
+  - namespace.yml
+  - netpol.yml
+  - ingressroute.yml
+namespace: adguard-home
+helmCharts:
+  - name: adguard-home
+    repo: https://helm.mtaha.dev/
+    version: '*'
+    releaseName: adguard-home
+    valuesFile: values.yaml
+    namespace: adguard-home

@@ -1,0 +1,7 @@
+#cloud-config
+runcmd:
+  - tailscale up --authkey=${TS_AUTHKEY} --hostname=${TS_HOSTNAME} --ssh --accept-risk=lose-ssh
+chpasswd:
+  list: |
+    root:{{ password_hash }}
+  expire: False

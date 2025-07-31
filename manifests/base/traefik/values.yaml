@@ -1,0 +1,37 @@
+deployment:
+  replicas: 1
+
+updateStrategy:
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
+
+ports:
+  websecure:
+    hostPort: 443
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+providers:
+  kubernetesGateway:
+    enabled: true
+    experimentalChannel: true
+
+gateway:
+  enabled: true
+  listeners:
+    websecure:
+      port: 8443
+      protocol: HTTPS
+      certificateRefs: 
+        - kind: Secret
+          name: wildcard-savew.dev-tls
+additionalArguments:
+  - --providers.kubernetescrd.allowCrossNamespace=true
+  - --entrypoints.name.http3
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: wildcard-savew.dev-tls

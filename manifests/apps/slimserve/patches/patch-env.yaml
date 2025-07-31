@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slimserve-main
+  namespace: slimserve
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: slimserve-main
+          envFrom:
+            - secretRef:
+                name: slimserve-secret

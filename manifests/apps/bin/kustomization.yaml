@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - bin-deployment.yaml
+  - bin-service.yaml
+  - bin-data-persistentvolumeclaim.yaml
+  - ingressroute.yml
+namespace: bin
+images:
+  - name: docker.io/wantguns/bin
+    newTag: v1.0.0

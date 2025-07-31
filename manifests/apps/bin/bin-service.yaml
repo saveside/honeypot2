@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: bin
+  name: bin
+spec:
+  ports:
+    - name: "6162"
+      port: 6162
+      targetPort: 6162
+  selector:
+    service: bin

@@ -1,0 +1,10 @@
+resources:
+  - longhorn/
+  - traefik/
+  - cert-manager/
+  - metallb/
+  - moniquet/
+  - dragonfly/
+  - cloudnative-pg/
+sortOptions:
+  order: fifo

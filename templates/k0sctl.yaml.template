@@ -1,0 +1,78 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster
+spec:
+  hosts:
+  - openSSH:
+      address: 1.2.3.4                                  # Write the IP address of the master node here
+      user: root
+      port: 22
+      keyPath: null
+    role: controller+worker
+    privateInterface: tailscale0
+    installFlags:
+      - '--kubelet-extra-args=\"--node-ip=1.2.3.4\"'    # Write the IP address of the master node here
+   - openSSH:
+      address: 2.3.4.5                                  # Write the IP address of the worker node 1 here
+      user: root
+      port: 22
+      keyPath: null
+    role: worker
+    privateInterface: tailscale0
+    installFlags:
+      - '--kubelet-extra-args=\"--node-ip=2.3.4.5\"'    # Write the IP address of the worker node 1 here
+  - openSSH:
+      address: 3.4.5.6                                  # Write the IP address of the worker node 2 here
+      user: root
+      port: 22
+      keyPath: null
+    role: worker
+    privateInterface: tailscale0
+    installFlags:
+      - '--kubelet-extra-args=\"--node-ip=3.4.5.6\"'    # Write the IP address of the worker node 2 here
+  k0s:
+    version: 1.33.3+k0s.0
+    config:
+      apiVersion: k0s.k0sproject.io/v1beta1
+      kind: Cluster
+      metadata:
+        name: k0s
+      spec:
+        api:
+          address: 1.2.3.4                              # Write the IP address of the master node here
+          k0sApiPort: 9443
+          port: 6443
+        installConfig:
+          users:
+            etcdUser: etcd
+            kineUser: kube-apiserver
+            konnectivityUser: konnectivity-server
+            kubeAPIserverUser: kube-apiserver
+            kubeSchedulerUser: kube-scheduler
+        konnectivity:
+          adminPort: 8133
+          agentPort: 8132
+        network:
+          kubeProxy:
+            disabled: false
+            mode: iptables
+          kuberouter:
+            autoMTU: true
+            mtu: 0
+            peerRouterASNs: ""
+            peerRouterIPs: ""
+          podCIDR: 172.16.0.0/16
+          provider: calico
+          calico:
+            mode: vxlan
+            envVars:
+              FELIX_IPTABLESMARKMASK: "0xff00ff00"
+              IP_AUTODETECTION_METHOD: "interface=tailscale0" # If you don't want to use Tailscale, change this
+          serviceCIDR: 10.96.0.0/12
+        podSecurityPolicy:
+          defaultPolicy: 00-k0s-privileged
+        storage:
+          type: etcd
+        telemetry:
+          enabled: false

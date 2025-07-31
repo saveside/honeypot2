@@ -1,0 +1,9 @@
+*.env
+*charts*
+*testenv*
+.terraform*
+secrets.tfvars
+secrets*.tfvars
+secrets*.hcl
+*.tfstate*
+*k0sctl.yaml

@@ -1,0 +1,8 @@
+main:
+  tls:
+    secretName: wildcard-savew.dev-tls
+    serverName: dns.savew.dev
+  podCIDR: 172.16.0.0/16
+
+nodeSelector:
+  kubernetes.io/hostname: honeybee

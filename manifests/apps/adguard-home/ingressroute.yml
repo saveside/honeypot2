@@ -1,0 +1,38 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: adguard-home-header
+  namespace: adguard-home
+spec:
+  headers:
+    customRequestHeaders:
+      Host: 'adguard-home-main.adguard-home.svc.cluster.local:443'
+      X-Real-IP: 'localhost'
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: adguard-home
+  namespace: adguard-home
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`dns.savew.dev`)
+      middlewares:
+        - name: adguard-home-header
+          namespace: adguard-home
+      priority: 10
+      services:
+        - kind: Service
+          name: adguard-home-main
+          namespace: adguard-home
+          passHostHeader: true
+          port: web-ssl
+          scheme: https
+  tls:
+    domains:
+      - main: dns.savew.dev
+    secretName: wildcard-savew.dev-tls

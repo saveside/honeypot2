@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: bin
+  name: bin
+  namespace: bin
+spec:
+  revisionHistoryLimit: 0
+  replicas: 2
+  selector:
+    matchLabels:
+      service: bin
+  template:
+    metadata:
+      labels:
+        service: bin
+    spec:
+      containers:
+        - name: bin
+          image: docker.io/wantguns/bin
+          volumeMounts:
+            - mountPath: /app/upload
+              name: bin-data
+          ports:
+            - containerPort: 6162
+              protocol: TCP
+      restartPolicy: Always
+      volumes:
+        - name: bin-data
+          persistentVolumeClaim:
+            claimName: bin-data
+
