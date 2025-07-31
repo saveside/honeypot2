@@ -24,7 +24,7 @@ gateway:
     websecure:
       port: 8443
       protocol: HTTPS
-      certificateRefs: 
+      certificateRefs:
         - kind: Secret
           name: wildcard-savew.dev-tls
 additionalArguments:
