@@ -1,0 +1,4 @@
+operatorConfig:
+  defaultTags[0]: tag:k8s-operator
+proxyConfig:
+  defaultTags: tag:k8s-pods

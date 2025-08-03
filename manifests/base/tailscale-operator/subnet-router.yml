@@ -1,0 +1,12 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: ts-pod-cidrs
+  namespace: tailscale
+spec:
+  hostname: tailscale-kube-internal
+  subnetRouter:
+    advertiseRoutes:
+      - '10.96.0.0/12'
+  tags:
+    - 'tag:k8s-pods'
