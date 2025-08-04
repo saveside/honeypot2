@@ -5,34 +5,34 @@ metadata:
 spec:
   hosts:
     - role: controller+worker
-      openSSH:
-        address: ${{ secrets.CONTROL_PLANE }}
+      ssh:
+        address: ${CONTROL_PLANE_IP}
         user: root
         port: 22
         keyPath: null
       privateInterface: tailscale0
       installFlags:
-        - '--kubelet-extra-args=\"--node-ip=${{ secrets.CONTROL_PLANE }}\"'
+        - '--kubelet-extra-args="--node-ip=${CONTROL_PLANE_IP}"'
     - role: worker
-      openSSH:
-        address: ${{ secrets.WORKER_1 }}
+      ssh:
+        address: ${WORKER_1_IP}
         user: root
         port: 22
         keyPath: null
       privateInterface: tailscale0
       installFlags:
-        - '--kubelet-extra-args=\"--node-ip=${{ secrets.WORKER_1 }}\"'
+        - '--kubelet-extra-args="--node-ip=${WORKER_1_IP}"'
     - role: worker
-      openSSH:
-        address: ${{ secrets.WORKER_2 }}
+      ssh:
+        address: ${WORKER_2_IP}
         user: root
         port: 22
         keyPath: null
       privateInterface: tailscale0
       installFlags:
-        - '--kubelet-extra-args=\"--node-ip=${{ secrets.WORKER_2 }}\"'
+        - '--kubelet-extra-args="--node-ip=${WORKER_2_IP}"'
   k0s:
-    version: "${{ steps.extract_version.outputs.k0s_version }}"
+    version: "${K0S_VERSION}"
     config:
       apiVersion: k0s.k0sproject.io/v1beta1
       kind: Cluster
@@ -40,7 +40,7 @@ spec:
         name: k0s
       spec:
         api:
-          address: ${{ secrets.CONTROL_PLANE }}
+          address: ${CONTROL_PLANE_IP}
           k0sApiPort: 9443
           port: 6443
         installConfig:
