@@ -1,6 +1,0 @@
-main:
-  appSecret:
-    autoCreate: kustomize
-postgresql:
-  secret:
-    autoCreate: kustomize
