@@ -1,0 +1,5 @@
+resources:
+  - base/
+  - apps/
+sortOptions:
+  order: fifo
