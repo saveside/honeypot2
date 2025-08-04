@@ -1,0 +1,78 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster
+spec:
+  hosts:
+    - role: controller+worker
+      openSSH:
+        address: ${{ secrets.CONTROL_PLANE }}
+        user: root
+        port: 22
+        keyPath: null
+      privateInterface: tailscale0
+      installFlags:
+        - '--kubelet-extra-args=\"--node-ip=${{ secrets.CONTROL_PLANE }}\"'
+    - role: worker
+      openSSH:
+        address: ${{ secrets.WORKER_1 }}
+        user: root
+        port: 22
+        keyPath: null
+      privateInterface: tailscale0
+      installFlags:
+        - '--kubelet-extra-args=\"--node-ip=${{ secrets.WORKER_1 }}\"'
+    - role: worker
+      openSSH:
+        address: ${{ secrets.WORKER_2 }}
+        user: root
+        port: 22
+        keyPath: null
+      privateInterface: tailscale0
+      installFlags:
+        - '--kubelet-extra-args=\"--node-ip=${{ secrets.WORKER_2 }}\"'
+  k0s:
+    version: "${{ steps.extract_version.outputs.k0s_version }}"
+    config:
+      apiVersion: k0s.k0sproject.io/v1beta1
+      kind: Cluster
+      metadata:
+        name: k0s
+      spec:
+        api:
+          address: ${{ secrets.CONTROL_PLANE }}
+          k0sApiPort: 9443
+          port: 6443
+        installConfig:
+          users:
+            etcdUser: etcd
+            kineUser: kube-apiserver
+            konnectivityUser: konnectivity-server
+            kubeAPIserverUser: kube-apiserver
+            kubeSchedulerUser: kube-scheduler
+        konnectivity:
+          adminPort: 8133
+          agentPort: 8132
+        network:
+          kubeProxy:
+            disabled: false
+            mode: iptables
+          kuberouter:
+            autoMTU: true
+            mtu: 0
+            peerRouterASNs: ""
+            peerRouterIPs: ""
+          podCIDR: 172.16.0.0/16
+          provider: calico
+          calico:
+            mode: vxlan
+            envVars:
+              FELIX_IPTABLESMARKMASK: "0xff00ff00"
+              IP_AUTODETECTION_METHOD: "interface=tailscale0"
+          serviceCIDR: 10.96.0.0/12
+        podSecurityPolicy:
+          defaultPolicy: 00-k0s-privileged
+        storage:
+          type: etcd
+        telemetry:
+          enabled: false
