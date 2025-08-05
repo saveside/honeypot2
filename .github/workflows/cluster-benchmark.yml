@@ -52,32 +52,32 @@ jobs:
           WORKER_2_IP: ${{ secrets.WORKER_2 }}
           K0S_VERSION: ${{ steps.extract_version.outputs.k0s_version }}
         run: |
-          mkdir -p $HOME/.kube 
+          mkdir -p $HOME/.kube
           k0sctl kubeconfig --config ./templates/k0sctl-workflow.yaml > $HOME/.kube/config
           sudo chmod 0700 $HOME/.kube/config
 
-    - name: Run kube-bench
-      run: |
-        # Clean up any previous job to ensure a fresh run
-        kubectl delete -f templates/kube-bench.yaml --ignore-not-found=true
+      - name: Run kube-bench
+        run: |
+          # Clean up any previous job to ensure a fresh run
+          kubectl delete -f templates/kube-bench.yaml --ignore-not-found=true
 
-        kubectl apply -f templates/kube-bench.yaml
+          kubectl apply -f templates/kube-bench.yaml
 
-        echo "Waiting for kube-bench job to complete..."
-        kubectl wait --for=condition=complete -n checkout job/kube-bench --timeout=1m || true
+          echo "Waiting for kube-bench job to complete..."
+          kubectl wait --for=condition=complete -n checkout job/kube-bench --timeout=1m || true
 
-    - name: Get output of kube-bench scan
-      run: |
-        kubectl logs -n checkout jobs/kube-bench > /tmp/kube-bench-logs.txt
+      - name: Get output of kube-bench scan
+        run: |
+          kubectl logs -n checkout jobs/kube-bench > /tmp/kube-bench-logs.txt
 
-    - name: Create issue about it
-      uses: peter-evans/create-issue-from-file@v5
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        title: Kube-bench Weekly Security Scan Report
-        content-filepath: /tmp/kube-bench-logs.txt
-        labels: |
-          security-scan 
-          automated issue
-          kube-bench
-        assignees: saveside
+      - name: Create issue about it
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Kube-bench Weekly Security Scan Report
+          content-filepath: /tmp/kube-bench-logs.txt
+          labels: |
+            security-scan
+            automated-issue
+            kube-bench
+          assignees: saveside
