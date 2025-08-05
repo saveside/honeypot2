@@ -1,0 +1,83 @@
+name: Benchmarking Cluster
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Connect Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:k0s-upgrade
+          version: latest
+          hostname: hivetool-k0s
+
+      - name: Install k0sctl
+        run: |
+          sudo wget https://github.com/k0sproject/k0sctl/releases/latest/download/k0sctl-linux-amd64 -O /usr/local/bin/k0sctl
+          sudo chmod +x /usr/local/bin/k0sctl
+
+      - name: Install kubectl
+        uses: Azure/setup-kubectl@v4.0.1
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Extract k0s version from vars.yaml
+        id: extract_version
+        run: |
+          version=$(yq e '.k0sVersion' vars.yaml)
+          echo "k0s_version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Kubeconfig
+        env:
+          CONTROL_PLANE_IP: ${{ secrets.CONTROL_PLANE }}
+          WORKER_1_IP: ${{ secrets.WORKER_1 }}
+          WORKER_2_IP: ${{ secrets.WORKER_2 }}
+          K0S_VERSION: ${{ steps.extract_version.outputs.k0s_version }}
+        run: |
+          mkdir -p $HOME/.kube 
+          k0sctl kubeconfig --config ./templates/k0sctl-workflow.yaml > $HOME/.kube/config
+          sudo chmod 0700 $HOME/.kube/config
+
+    - name: Run kube-bench
+      run: |
+        # Clean up any previous job to ensure a fresh run
+        kubectl delete -f templates/kube-bench.yaml --ignore-not-found=true
+
+        kubectl apply -f templates/kube-bench.yaml
+
+        echo "Waiting for kube-bench job to complete..."
+        kubectl wait --for=condition=complete -n checkout job/kube-bench --timeout=1m || true
+
+    - name: Get output of kube-bench scan
+      run: |
+        kubectl logs -n checkout jobs/kube-bench > /tmp/kube-bench-logs.txt
+
+    - name: Create issue about it
+      uses: peter-evans/create-issue-from-file@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        title: Kube-bench Weekly Security Scan Report
+        content-filepath: /tmp/kube-bench-logs.txt
+        labels: |
+          security-scan 
+          automated issue
+          kube-bench
+        assignees: saveside
