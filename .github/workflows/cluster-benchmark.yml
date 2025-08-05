@@ -22,7 +22,7 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:k0s-upgrade
+          tags: tag:k0s-benchmark
           version: latest
           hostname: hivetool-k0s
 
@@ -45,16 +45,12 @@ jobs:
           version=$(yq e '.k0sVersion' vars.yaml)
           echo "k0s_version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Configure Kubeconfig
+      - name: Add kubeconfig
         env:
-          CONTROL_PLANE_IP: ${{ secrets.CONTROL_PLANE }}
-          WORKER_1_IP: ${{ secrets.WORKER_1 }}
-          WORKER_2_IP: ${{ secrets.WORKER_2 }}
-          K0S_VERSION: ${{ steps.extract_version.outputs.k0s_version }}
+          KUBECTLCONFIG: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p $HOME/.kube
-          k0sctl kubeconfig --config ./templates/k0sctl-workflow.yaml > $HOME/.kube/config
-          sudo chmod 0700 $HOME/.kube/config
+          echo "$KUBECTLCONFIG" > $HOME/.kube/config
 
       - name: Run kube-bench
         run: |
